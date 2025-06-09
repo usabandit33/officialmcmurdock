@@ -1,0 +1,174 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Author Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 text-white p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold">Your Name</a>
+            <div class="space-x-4">
+                <a href="#home" class="hover:text-gray-300">Home</a>
+                <a href="#books" class="hover:text-gray-300">Books</a>
+                <a href="#about" class="hover:text-gray-300">About</a>
+                <a href="#contact" class="hover:text-gray-300">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="bg-cover bg-center h-screen text-white flex items-center" style="background-image: url('https://source.unsplash.com/1600x900/?adventure')">
+        <div class="container mx-auto text-center">
+            <h1 class="text-5xl font-bold mb-4">Thrilling Adventures Await</h1>
+            <p class="text-xl mb-6">Discover action-packed novels by [Your Name]</p>
+            <a href="#books" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full">Explore My Books</a>
+        </div>
+    </section>
+
+    <!-- Books Section -->
+    <section id="books" class="py-16">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-8">My Books</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Book 1 -->
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <img src="https://source.unsplash.com/300x450/?book" alt="Book Cover" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Shadow of Freedom</h3>
+                        <p class="text-gray-600 mb-4">A gripping thriller about courage and justice in the fight against human trafficking.</p>
+                        <a href="https://www.amazon.com" target="_blank" class="text-blue-600 hover:underline">Buy on Amazon</a>
+                    </div>
+                </div>
+                <!-- Book 2 -->
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <img src="https://source.unsplash.com/300x450/?book" alt="Book Cover" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Dawn of Deliverance</h3>
+                        <p class="text-gray-600 mb-4">An explosive tale of redemption set in exotic locations.</p>
+                        <a href="https://www.amazon.com" target="_blank" class="text-blue-600 hover:underline">Buy on Amazon</a>
+                    </div>
+                </div>
+                <!-- Book 3 -->
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <img src="https://source.unsplash.com/300x450/?book" alt="Book Cover" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Untitled Thriller</h3>
+                        <p class="text-gray-600 mb-4">Coming soon: A new adventure awaits.</p>
+                        <a href="#" class="text-blue-600 hover:underline">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="bg-gray-200 py-16">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-8">About the Author</h2>
+            <div class="flex flex-col md:flex-row items-center">
+                <img src="https://source.unsplash.com/300x300/?portrait" alt="Author Photo" class="w-48 h-48 rounded-full mb-6 md:mb-0 md:mr-8">
+                <div>
+                    <p class="text-gray-700 mb-4">
+                        Hailing from a small town, [Your Name] crafts action-thriller novels inspired by real places visited during global travels. Now based in Austin, Texas, his stories blend heart-pounding suspense with authentic settings, drawing readers into worlds of courage and justice. When not writing, he’s exploring new destinations or plotting his next gripping tale.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-8">Get in Touch</h2>
+            <div class="max-w-lg mx-auto">
+                <div id="contactForm" class="bg-white shadow-lg rounded-lg p-6">
+                    <div class="mb-4">
+                        <label for="name" class="block text-gray-700 mb-2">Name</label>
+                        <input type="text" id="name" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" class="w-full p-3 border rounded-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="message" class="block text-gray-700 mb-2">Message</label>
+                        <textarea id="message" class="w-full p-3 border rounded-lg" rows="5" required></textarea>
+                    </div>
+                    <button onclick="submitForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full w-full">Send Message</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 [Your Name]. All rights reserved.</p>
+            <div class="mt-4 space-x-4">
+                <a href="https://x.com" target="_blank" class="hover:text-gray-300"><i class="fab fa-x"></i></a>
+                <a href="https://facebook.com" target="_blank" class="hover:text-gray-300"><i class="fab fa-facebook"></i></a>
+                <a href="https://instagram.com" target="_blank" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function submitForm() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            if (name && email && message) {
+                alert('Thank you for your message! We will get back to you soon.');
+                document.getElementById('contactForm').reset();
+            } else {
+                alert('Please fill out all fields.');
+            }
+        }
+    </script>
+</body>
+</html>
